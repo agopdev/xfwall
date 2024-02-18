@@ -4,6 +4,7 @@ install_script() {
     echo "Installing xfwall in /usr/local/bin/..."
     sudo cp "$0" /usr/local/bin/xfwall
     sudo chmod +x /usr/local/bin/xfwall
+    mkdir ~/.xfwall/history
     echo "Installation completed! Try running xfwall"
 }
 
