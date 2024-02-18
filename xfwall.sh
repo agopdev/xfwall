@@ -8,7 +8,7 @@ get_wallpaper_url() {
     tag="landscape"
     categories="110"
     purity="100"
-    apikey="2RD4RdmlgWyjmUbInbkwL2PMuJQnscwO"
+    apikey=""
 
 
     wallpaper_url=$(curl -s "https://wallhaven.cc/api/v1/search?q=$tag&categories=$categories&purity=$purity&apikey=$apikey" | jq -r ".data[$random_index].path")
