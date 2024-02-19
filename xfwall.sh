@@ -17,13 +17,16 @@ check_dependencies
 # Get wallpaper URL and select one randomly
 get_wallpaper_url() {
     local tag="landscapes"
-    local categories="100"
+    local categories="110"
     local purity="100"
-    local apikey=""
+    local apikey="2RD4RdmlgWyjmUbInbkwL2PMuJQnscwO"
+    local resolutions="1920x1080"
+    local ratios=""
+    local sorting="relevance"
 
     local output_json="/tmp/output.json"
 
-    curl -s "https://wallhaven.cc/api/v1/search?q=$tag&categories=$categories&purity=$purity&apikey=$apikey" > "$output_json"
+    curl -s "https://wallhaven.cc/api/v1/search?q=$tag&categories=$categories&purity=$purity&resolutions=$resolutions&ratios=$ratios&sorting=$sorting&apikey=$apikey" > "$output_json"
 
     local random_index
     total_elements=$(jq '.data | length' "$output_json")
@@ -51,11 +54,59 @@ update_wallpaper() {
     fi
 }
 
-# Time in seconds
-interval=10
+# Start xfwall
+start () {
+    local interval=10
 
-while true; do
-    wallpaper_url=$(get_wallpaper_url)
-    update_wallpaper "$wallpaper_url"
-    sleep "$interval"
-done
+    while true; do
+        wallpaper_url=$(get_wallpaper_url)
+        update_wallpaper "$wallpaper_url"
+        sleep "$interval"
+    done
+}
+
+# Show help
+display_help() {
+    echo "
+        
+        ___   ___  ___________    __    ____  ___       __       __      
+        \  \ /  / |   ____\   \  /  \  /   / /   \     |  |     |  |     
+         \  V  /  |  |__   \   \/    \/   / /  ^  \    |  |     |  |     
+          >   <   |   __|   \            / /  /_\  \   |  |     |  |     
+         /  .  \  |  |       \    /\    / /  _____  \  |  `----.|  `----.
+        /__/ \__\ |__|        \__/  \__/ /__/     \__\ |_______||_______|
+                                                                        
+
+        Usage: xfwall [options]
+
+        COMMON:
+        help: displays this screen
+
+        START:
+        start: Start xfwall with the actual configuration
+
+        CONFIG:
+        
+    "
+}
+
+# Set options from CLI
+case "$1" in
+    config)
+        case "$2" in
+            )
+                echo "dfsfsd"
+                ;;
+            *)
+                exit 1
+                ;;
+        esac
+        ;;
+    start)
+        start
+        ;;
+    *)
+        display_help
+        exit 1
+        ;;
+esac
