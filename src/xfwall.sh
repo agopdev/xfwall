@@ -18,16 +18,16 @@ check_dependencies
 
 # Get wallpaper URL and select one randomly
 get_wallpaper_url() {
-    local tag=""
+    local tag=$(get_random_tag)
     local categories="100"
     local purity="100"
     local apikey=$(get_apikey)
-    local resolutions="1920x1080"
+    local resolutions=$(get_resolutions)
     local ratios=""
     local sorting="random"
 
     local output_json="/tmp/output.json"
-
+    
     curl -s "https://wallhaven.cc/api/v1/search?q=$tag&categories=$categories&purity=$purity&resolutions=$resolutions&ratios=$ratios&sorting=$sorting&apikey=$apikey" > "$output_json"
 
     local random_index
@@ -143,6 +143,37 @@ get_apikey(){
     jq '.config.apikey' ~/.xfwall/config.json
 }
 
+# Resolutions
+get_resolutions(){
+    jq -r '.config.resolutions | join(",")' ~/.xfwall/config.json
+}
+
+# Tag
+get_random_tag(){
+    jq -r '.config.tags | join(",")' ~/.xfwall/config.json | tr ',' '\n' | shuf -n 1
+}
+
+# Add / Del options
+handle_add_del(){
+    
+    if [ "$1" = "add" ]; then
+        add_del="+"
+    elif [ "$1" = "del" ]; then
+        add_del="-"
+    fi
+
+    case "$2" in
+        --resolution|-r)
+            edit_json_file ".config.resolutions $add_del= [\"$3\"]"
+            ;;
+        --tag|-t)
+            edit_json_file ".config.tags $add_del= [\"$3\"]"
+            ;;
+    esac
+
+
+}
+
 
 # LIST CLI ACTIONS
 
@@ -159,17 +190,17 @@ case "$1" in
         ;;
     add|del)
         case "$2" in
-            --categories|-c)
-                #function
-                ;;
-            --purity|-p)
-                #function
-                ;;
+            #--categories|-c)
+                #handle_add_del "$1" "$2" "$3"
+                #;;
+            #--purity|-p)
+             #   handle_add_del "$1" "$2" "$3"
+              #  ;;
             --resolution|-r)
-                #function
+                handle_add_del "$1" "$2" "$3"
                 ;;
             --tag|-t)
-                #function
+                handle_add_del "$1" "$2" "$3"
                 ;;
         esac
         ;;
