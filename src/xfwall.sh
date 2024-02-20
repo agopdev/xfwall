@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# FUNCTIONALITY
+
 # Check that required dependencies are installed
 check_dependencies() {
     local dependencies=("jq" "curl")
@@ -19,7 +21,7 @@ get_wallpaper_url() {
     local tag=""
     local categories="100"
     local purity="100"
-    local apikey="2RD4RdmlgWyjmUbInbkwL2PMuJQnscwO"
+    local apikey=$(get_apikey)
     local resolutions="1920x1080"
     local ratios=""
     local sorting="random"
@@ -56,7 +58,7 @@ update_wallpaper() {
 
 # Change wallpaper
 do_wallpaper_replacement () {
-    local interval=1
+    local interval=$(get_interval)
 
     wallpaper_url=$(get_wallpaper_url)
     update_wallpaper "$wallpaper_url"
@@ -79,7 +81,7 @@ display_help() {
     |    \  \ /  / |   ____\   \  /  \  /   / /   \     |  |     |  |        | |                                                                    
     |     \  V  /  |  |__   \   \/    \/   / /  ^  \    |  |     |  |        | |
     |      >   <   |   __|   \            / /  /_\  \   |  |     |  |        | |
-    |     /  .  \  |  |       \    /\    / /  _____  \  |  ´----.|  ´----.   | |
+    |     /  .  \  |  |       \    /\    / /  _____  \  |   ----.|   ----.   | |
     |    /__/ \__\ |__|        \__/  \__/ /__/     \__\ |_______||_______|   | |
     |________________________________________________________________________| |
      \________________________________________________________________________\|
@@ -100,7 +102,6 @@ display_help() {
 
         SEARCH PARAMS:
         Usage: xfwall [add/del] [option] [value]
-        --api-key, -a           Api key for the nsfw purity option
         --categories, -c        Accepted values: general, anime, people
         --purity, -p            Accepted values: sfw, sketchy, nsfw
         --resolution, -r        Resolution for the search. Ex. --resolution 1920x1080
@@ -109,11 +110,41 @@ display_help() {
 
         CONFIG:
         Usage: xfwall [option] [value]
-        --interval, -i          Set time in seconds until next wallpaper. Ex. --interval 300        
+        --interval, -i          Set time in seconds until next wallpaper. Ex. --interval 300
+        --api-key, -a           Set api key for the nsfw purity option
         
         
     "
 }
+
+
+# CONFIGURATIONS
+
+# Edit JSON
+edit_json_file(){
+    jq "$1" ~/.xfwall/config.json > /tmp/config.json && mv /tmp/config.json ~/.xfwall/config.json
+}
+
+# Interval
+set_interval(){
+    edit_json_file '.config.interval = '$1''
+}
+
+get_interval(){
+    jq '.config.interval' ~/.xfwall/config.json
+}
+
+# API Key
+set_apikey(){
+    edit_json_file '.config.apikey = '$1''
+}
+
+get_apikey(){
+    jq '.config.apikey' ~/.xfwall/config.json
+}
+
+
+# LIST CLI ACTIONS
 
 # Set options from CLI
 case "$1" in
@@ -128,25 +159,25 @@ case "$1" in
         ;;
     add|del)
         case "$2" in
-            --api-key|-a)
-                function
-                ;;
             --categories|-c)
-                function
+                #function
                 ;;
             --purity|-p)
-                function
+                #function
                 ;;
             --resolution|-r)
-                function
+                #function
                 ;;
             --tag|-t)
-                function
+                #function
                 ;;
         esac
         ;;
+    --api-key|-a)
+        set_apikey "$2"
+        ;;
     --interval|-i)
-        function
+        set_interval "$2"
         ;;
     "")
         display_help
