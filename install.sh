@@ -2,12 +2,18 @@
 
 install_script() {
     echo "Installing xfwall in /usr/local/bin/..."
+    
     sudo cp ./src/xfwall.sh /usr/local/bin/xfwall
     sudo chmod +x /usr/local/bin/xfwall
-    mkdir ~/.xfwall/history
-    cp ./src/config.json ~/.xfwall/config.json
-    echo "Installation completed! Try executing xfwall start"
+    local user=${SUDO_USER:-$USER}
+    local user_home=$(eval echo ~$user)
+    mkdir -p "$user_home/.xfwall/history"
+    cp ./src/config.json "$user_home/.xfwall/config.json"
+    sudo chown -R "$user" "$user_home/.xfwall"
+
+    echo "Installation completed! Try executing xfwall --help"
 }
+
 
 uninstall_script() {
     echo "Uninstalling xfwall..."

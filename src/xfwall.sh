@@ -60,6 +60,7 @@ update_wallpaper() {
 # Change wallpaper
 do_wallpaper_replacement () {
     wallpaper_url=$(get_wallpaper_url)
+    echo "Actual wallpaper: $wallpaper_url"
     update_wallpaper "$wallpaper_url"
 }
 
@@ -92,10 +93,11 @@ display_help() {
         COMMON:
         Usage: xfwall [option]
         --help, -h              Prints this screen
+        --config, -c            Prints the actual configuration
 
 
         WALLPAPERS:
-        Usage: xfwall [option]
+        Usage: xfwall [command]
         start                   Start xfwall with the actual configuration
         change                  Change actual wallpaper, doesn't restart timer
 
@@ -127,7 +129,7 @@ edit_json_file(){
 
 # Interval
 set_interval(){
-    edit_json_file '.config.interval = '$1''
+    edit_json_file ".config.interval = "$1""
 }
 
 get_interval(){
@@ -141,7 +143,7 @@ get_sorting(){
 
 # API Key
 set_apikey(){
-    edit_json_file '.wallhaven.apikey = '$1''
+    edit_json_file '.wallhaven.apikey = "'"$1"'"'
 }
 
 get_apikey(){
