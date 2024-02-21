@@ -1,30 +1,28 @@
 {
-    "config": {        
-        "tags": [
-            "nature",
-            "landscapes",
-            "tokyo"
-        ],
-        "resolutions": [
-            "1920x1080",
-            "1080x720"
-        ],
-        "ratios": [
-            "16x9",
-            "16x10"
-        ],
-        "categories": {
-            "general": true,
-            "anime": true,
-            "people": true
-        },
-        "purity": {
-            "sfw": true,
-            "sketchy": true,
-            "nsfw": true
-        },
-        "sorting": "random",
-        "interval": 10,
-        "apikey": ""
+    "config": {
+      "interval": 300
+    },
+    "wallhaven": {
+      "tags": [
+        "nature",
+        "landscapes"
+      ],
+      "resolutions": [
+        "1080x720",
+        "1920x1080"
+      ],
+      "categories": {
+        "general": true,
+        "anime": true,
+        "people": true
+      },
+      "purity": {
+        "sfw": true,
+        "sketchy": false,
+        "nsfw": false
+      },
+      "sorting": "random",
+      "apikey": ""
     }
-}
+  }
+  

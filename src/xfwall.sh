@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export CONFIG_FILE_PATH=~/.xfwall/config.json
+
 # FUNCTIONALITY
 
 # Check that required dependencies are installed
@@ -23,12 +25,11 @@ get_wallpaper_url() {
     local purity=$(get_purity)
     local apikey=$(get_apikey)
     local resolutions=$(get_resolutions)
-    local ratios=""
     local sorting=$(get_sorting)
 
     local output_json="/tmp/output.json"
     
-    curl -s "https://wallhaven.cc/api/v1/search?q=$tag&categories=$categories&purity=$purity&resolutions=$resolutions&ratios=$ratios&sorting=$sorting&apikey=$apikey" > "$output_json"
+    curl -s "https://wallhaven.cc/api/v1/search?q=$tag&categories=$categories&purity=$purity&resolutions=$resolutions&sorting=$sorting&apikey=$apikey" > "$output_json"
 
     local random_index
     total_elements=$(jq '.data | length' "$output_json")
@@ -121,7 +122,7 @@ display_help() {
 
 # Edit JSON
 edit_json_file(){
-    jq "$1" ~/.xfwall/config.json > /tmp/config.json && mv /tmp/config.json ~/.xfwall/config.json
+    jq "$1" $CONFIG_FILE_PATH > /tmp/config.json && mv /tmp/config.json $CONFIG_FILE_PATH
 }
 
 # Interval
@@ -130,31 +131,35 @@ set_interval(){
 }
 
 get_interval(){
-    jq -r '.config.interval' ~/.xfwall/config.json
+    jq -r '.config.interval' $CONFIG_FILE_PATH
 }
 
 # Sorting
 get_sorting(){
-    jq -r '.config.sorting' ~/.xfwall/config.json
+    jq -r '.wallhaven.sorting' $CONFIG_FILE_PATH
 }
 
 # API Key
 set_apikey(){
-    edit_json_file '.config.apikey = '$1''
+    edit_json_file '.wallhaven.apikey = '$1''
 }
 
 get_apikey(){
-    jq -r '.config.apikey' ~/.xfwall/config.json
+    jq -r '.wallhaven.apikey' $CONFIG_FILE_PATH
 }
 
 # Resolutions
 get_resolutions(){
-    jq -r '.config.resolutions | join(",")' ~/.xfwall/config.json
+    jq -r '.wallhaven.resolutions | join(",")' $CONFIG_FILE_PATH
 }
 
 # Tag
+get_tags(){
+    jq -r '.wallhaven.tags | join(",")' $CONFIG_FILE_PATH
+}
+
 get_random_tag(){
-    jq -r '.config.tags | join(",")' ~/.xfwall/config.json | tr ',' '\n' | shuf -n 1
+    jq -r '.wallhaven.tags | join(",")' $CONFIG_FILE_PATH | tr ',' '\n' | shuf -n 1
 }
 
 # Auxiliar boolean value
@@ -169,9 +174,9 @@ get_boolean_value() {
 # Categories
 get_categories(){
     
-    local general=$(jq -r '.config.categories.general' ~/.xfwall/config.json)
-    local anime=$(jq -r '.config.categories.anime' ~/.xfwall/config.json)
-    local people=$(jq -r '.config.categories.people' ~/.xfwall/config.json)
+    local general=$(jq -r '.wallhaven.categories.general' $CONFIG_FILE_PATH)
+    local anime=$(jq -r '.wallhaven.categories.anime' $CONFIG_FILE_PATH)
+    local people=$(jq -r '.wallhaven.categories.people' $CONFIG_FILE_PATH)
     local categories=""
     
     categories="${categories}$(get_boolean_value "$general")"
@@ -184,9 +189,9 @@ get_categories(){
 # Purity
 get_purity(){
     
-    local sfw=$(jq -r '.config.purity.sfw' ~/.xfwall/config.json)
-    local sketchy=$(jq -r '.config.purity.sketchy' ~/.xfwall/config.json)
-    local nsfw=$(jq -r '.config.purity.nsfw' ~/.xfwall/config.json)
+    local sfw=$(jq -r '.wallhaven.purity.sfw' $CONFIG_FILE_PATH)
+    local sketchy=$(jq -r '.wallhaven.purity.sketchy' $CONFIG_FILE_PATH)
+    local nsfw=$(jq -r '.wallhaven.purity.nsfw' $CONFIG_FILE_PATH)
     local purity=""
 
     purity="${purity}$(get_boolean_value "$sfw")"
@@ -198,42 +203,93 @@ get_purity(){
 
 # Add / Del options
 handle_add_del(){
+
+    add_del="-"
     
-    if [ "$1" = "add" ]; then
+    if [ "$1" == "add" ]; then
         add_del="+"
-    elif [ "$1" = "del" ]; then
-        add_del="-"
     fi
 
     case "$2" in
         --resolution|-r)
-            edit_json_file ".config.resolutions $add_del= [\"$3\"]"
+            regex='^[0-9]+x[0-9]+$'
+            if ! [[ $3 =~ $regex ]]; then
+                echo "Error: Invalid format for resolution. Allowed format: (number)x(number)"
+                exit 1
+            fi
+            edit_json_file ".wallhaven.resolutions $add_del= [\"$3\"]"
             ;;
         --tag|-t)
-            edit_json_file ".config.tags $add_del= [\"$3\"]"
+            edit_json_file ".wallhaven.tags $add_del= [\"$3\"]"
+            ;;
+        *)
+            echo "Error: Unrecognized option '$2'"
+            exit 1
             ;;
     esac
 
 }
 
+# Auxiliary array search
+search_in_array() {
+    local seeking=$1; shift
+    for element; do
+        if [[ $element == "$seeking" ]]; then
+            return 0
+            break
+        fi
+    done
+    return 1
+}
+
 # Enable / Disable options
 handle_enable_disable(){
+
+    enable_disable=false
     
-    if [ "$1" = "enable" ]; then
+    if [ "$1" == "enable" ]; then
         enable_disable=true
-    elif [ "$1" = "disable" ]; then
-        enable_disable=false
     fi
+
+    valid_categories=("general" "anime" "people")
+    valid_purity=("sfw" "sketchy" "nsfw")
 
     case "$2" in
         --categories|-c)
-            edit_json_file "if .config.categories.$3? then .config.categories.$3 = $enable_disable else . end"
+            if ! search_in_array "$3" "${valid_categories[@]}"; then
+                echo "Error: Unknown category '$3'"
+                exit 1
+            fi
+            edit_json_file ".wallhaven.categories.$3 = $enable_disable"
             ;;
         --purity|-p)
-            edit_json_file "if .config.purity.$3? then .config.purity.$3 = $enable_disable else . end"
+            if ! search_in_array "$3" "${valid_purity[@]}"; then
+                echo "Error: Unknown purity '$3'"
+                exit 1
+            fi
+            edit_json_file ".wallhaven.purity.$3 = $enable_disable"
+            ;;
+        *)
+            echo "Error: Unrecognized option '$2'"
+            exit 1
             ;;
     esac
 
+}
+
+# Print configuration
+print_xfwall_configuration(){
+    echo "    
+    ACTUAL CONFIG:
+
+        Tags:                                   $(get_tags)
+        Resolutions:                            $(get_resolutions)
+        Categories (general/anime/people):      $(get_categories)
+        Purity (sfw/sketchy/nsfw):              $(get_purity)
+        Interval:                               $(get_interval)
+        Api Key:                                $(get_apikey)
+    
+    "
 }
 
 
@@ -241,8 +297,11 @@ handle_enable_disable(){
 
 # Set options from CLI
 case "$1" in
-    -h|--help)
+    --help|-h|help)
         display_help
+        ;;
+    --config|-c)
+        print_xfwall_configuration
         ;;
     start)
         start
@@ -258,6 +317,10 @@ case "$1" in
             --tag|-t)
                 handle_add_del "$1" "$2" "$3"
                 ;;
+            *)
+                echo "Error: Unrecognized option '$2'"
+                exit 1
+                ;;
         esac
         ;;
     enable|disable)
@@ -267,6 +330,10 @@ case "$1" in
                 ;;
             --purity|-p)
                 handle_enable_disable "$1" "$2" "$3"
+                ;;
+            *)
+                echo "Error: Unrecognized option '$2'"
+                exit 1
                 ;;
         esac
         ;;
