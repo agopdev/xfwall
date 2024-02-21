@@ -19,12 +19,12 @@ check_dependencies
 # Get wallpaper URL and select one randomly
 get_wallpaper_url() {
     local tag=$(get_random_tag)
-    local categories="100"
-    local purity="100"
+    local categories=$(get_categories)
+    local purity=$(get_purity)
     local apikey=$(get_apikey)
     local resolutions=$(get_resolutions)
     local ratios=""
-    local sorting="random"
+    local sorting=$(get_sorting)
 
     local output_json="/tmp/output.json"
     
@@ -58,18 +58,17 @@ update_wallpaper() {
 
 # Change wallpaper
 do_wallpaper_replacement () {
-    local interval=$(get_interval)
-
     wallpaper_url=$(get_wallpaper_url)
     update_wallpaper "$wallpaper_url"
-    sleep "$interval"
 }
 
 # Start xfwall
 start () {
     
     while true; do
+        local interval=$(get_interval)
         do_wallpaper_replacement
+        sleep "$interval"
     done
 }
 
@@ -84,7 +83,7 @@ display_help() {
     |     /  .  \  |  |       \    /\    / /  _____  \  |   ----.|   ----.   | |
     |    /__/ \__\ |__|        \__/  \__/ /__/     \__\ |_______||_______|   | |
     |________________________________________________________________________| |
-     \________________________________________________________________________\|
+     \________________________________________________________________________\'
 
 
         Usage: See each category
@@ -97,7 +96,7 @@ display_help() {
         WALLPAPERS:
         Usage: xfwall [option]
         start                   Start xfwall with the actual configuration
-        change                  Change actual wallpaper and restart timer
+        change                  Change actual wallpaper, doesn't restart timer
 
 
         SEARCH PARAMS:
@@ -131,7 +130,12 @@ set_interval(){
 }
 
 get_interval(){
-    jq '.config.interval' ~/.xfwall/config.json
+    jq -r '.config.interval' ~/.xfwall/config.json
+}
+
+# Sorting
+get_sorting(){
+    jq -r '.config.sorting' ~/.xfwall/config.json
 }
 
 # API Key
@@ -140,7 +144,7 @@ set_apikey(){
 }
 
 get_apikey(){
-    jq '.config.apikey' ~/.xfwall/config.json
+    jq -r '.config.apikey' ~/.xfwall/config.json
 }
 
 # Resolutions
@@ -151,6 +155,45 @@ get_resolutions(){
 # Tag
 get_random_tag(){
     jq -r '.config.tags | join(",")' ~/.xfwall/config.json | tr ',' '\n' | shuf -n 1
+}
+
+# Auxiliar boolean value
+get_boolean_value() {
+    if [ "$1" == true ]; then
+        echo "1"
+    else
+        echo "0"
+    fi
+}
+
+# Categories
+get_categories(){
+    
+    local general=$(jq -r '.config.categories.general' ~/.xfwall/config.json)
+    local anime=$(jq -r '.config.categories.anime' ~/.xfwall/config.json)
+    local people=$(jq -r '.config.categories.people' ~/.xfwall/config.json)
+    local categories=""
+    
+    categories="${categories}$(get_boolean_value "$general")"
+    categories="${categories}$(get_boolean_value "$anime")"
+    categories="${categories}$(get_boolean_value "$people")"
+
+    echo "$categories"
+}
+
+# Purity
+get_purity(){
+    
+    local sfw=$(jq -r '.config.purity.sfw' ~/.xfwall/config.json)
+    local sketchy=$(jq -r '.config.purity.sketchy' ~/.xfwall/config.json)
+    local nsfw=$(jq -r '.config.purity.nsfw' ~/.xfwall/config.json)
+    local purity=""
+
+    purity="${purity}$(get_boolean_value "$sfw")"
+    purity="${purity}$(get_boolean_value "$sketchy")"
+    purity="${purity}$(get_boolean_value "$nsfw")"
+
+    echo "$purity"
 }
 
 # Add / Del options
@@ -171,6 +214,25 @@ handle_add_del(){
             ;;
     esac
 
+}
+
+# Enable / Disable options
+handle_enable_disable(){
+    
+    if [ "$1" = "enable" ]; then
+        enable_disable=true
+    elif [ "$1" = "disable" ]; then
+        enable_disable=false
+    fi
+
+    case "$2" in
+        --categories|-c)
+            edit_json_file "if .config.categories.$3? then .config.categories.$3 = $enable_disable else . end"
+            ;;
+        --purity|-p)
+            edit_json_file "if .config.purity.$3? then .config.purity.$3 = $enable_disable else . end"
+            ;;
+    esac
 
 }
 
@@ -190,17 +252,21 @@ case "$1" in
         ;;
     add|del)
         case "$2" in
-            #--categories|-c)
-                #handle_add_del "$1" "$2" "$3"
-                #;;
-            #--purity|-p)
-             #   handle_add_del "$1" "$2" "$3"
-              #  ;;
             --resolution|-r)
                 handle_add_del "$1" "$2" "$3"
                 ;;
             --tag|-t)
                 handle_add_del "$1" "$2" "$3"
+                ;;
+        esac
+        ;;
+    enable|disable)
+        case "$2" in
+            --categories|-c)
+                handle_enable_disable "$1" "$2" "$3"
+                ;;
+            --purity|-p)
+                handle_enable_disable "$1" "$2" "$3"
                 ;;
         esac
         ;;
@@ -218,3 +284,8 @@ case "$1" in
         exit 1
         ;;
 esac
+
+# Echo Errors
+echo_error(){
+    echo $error
+}
