@@ -2,11 +2,16 @@
 
 export CONFIG_FILE_PATH=~/.xfwall/config.json
 
+# Monitor name
+get_all_monitors() {
+    xrandr | grep " connected" | awk '{print $1}'
+}
+
 # FUNCTIONALITY
 
 # Check that required dependencies are installed
 check_dependencies() {
-    local dependencies=("jq" "curl")
+    local dependencies=("jq" "curl" "xrandr")
 
     for dep in "${dependencies[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
@@ -47,14 +52,18 @@ get_wallpaper_url() {
 update_wallpaper() {
     local wallpaper_url="$1"
     local image_path=~/.xfwall/history/last_img.jpg
+    local monitors=$(get_all_monitors)
 
-    curl -o "$image_path" "$wallpaper_url"
+    for monitor in $monitors; do
+        curl -o "$image_path" "$wallpaper_url"
 
-    if [ $? -eq 0 ]; then
-        xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitoreDP1/workspace0/last-image --set "$image_path"
-    else
-        echo "Error: The wallpaper could not be downloaded."
-    fi
+        if [ $? -eq 0 ]; then
+            xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitor$monitor/workspace0/last-image --set "$image_path"
+            echo "Wallpaper updated for monitor: $monitor"
+        else
+            echo "Error: The wallpaper could not be downloaded"
+        fi
+    done
 }
 
 # Change wallpaper
@@ -94,6 +103,7 @@ display_help() {
         Usage: xfwall [option]
         --help, -h              Prints this screen
         --config, -c            Prints the actual configuration
+        --monitors, -m          Prints the actual monitors
 
 
         WALLPAPERS:
@@ -304,6 +314,9 @@ case "$1" in
         ;;
     --config|-c)
         print_xfwall_configuration
+        ;;
+    --monitors|-m)
+        get_all_monitors
         ;;
     start)
         start
