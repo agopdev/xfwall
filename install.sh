@@ -1,12 +1,18 @@
 #!/bin/bash
 
+get_actual_user(){
+    local user=${SUDO_USER:-$USER}
+    echo "$user"
+}
+
 install_script() {
     echo "Installing xfwall in /usr/local/bin/..."
     
+    local user=$(get_actual_user)
+    local user_home=$(eval echo ~$user)
+    
     sudo cp ./src/xfwall.sh /usr/local/bin/xfwall
     sudo chmod +x /usr/local/bin/xfwall
-    local user=${SUDO_USER:-$USER}
-    local user_home=$(eval echo ~$user)
     mkdir -p "$user_home/.xfwall/history"
     cp ./src/config.json "$user_home/.xfwall/config.json"
     sudo chown -R "$user" "$user_home/.xfwall"
@@ -15,9 +21,13 @@ install_script() {
 }
 
 
-uninstall_script() {
+uninstall_script() {    
     echo "Uninstalling xfwall..."
+
+    local user=$(get_actual_user)
+    local user_home=$(eval echo ~$user)
     sudo rm /usr/local/bin/xfwall
+    sudo rm -rf "$user_home/.xfwall"
     echo "xfwall completely removed!"
 }
 
@@ -29,10 +39,10 @@ fi
 
 # Check if is installing or uninstalling xfwall
 case "$1" in
-    install)
+    --install)
         install_script
         ;;
-    uninstall)
+    --uninstall)
         uninstall_script
         ;;
     *)
