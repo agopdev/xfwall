@@ -46,7 +46,7 @@ case "$1" in
         uninstall_script
         ;;
     *)
-        echo "Usage: $0 {install|uninstall}"
+        echo "Usage: $0 {--install|--uninstall}"
         exit 1
         ;;
 esac

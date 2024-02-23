@@ -43,10 +43,10 @@ __XFWall can be installed by following these steps:__
     ```bash
     $ chmod +x ./install.sh
     ```
-+ Execute `install.sh` from terminal with option `install`
++ Execute `install.sh` from terminal with option `--install`
 
     ```bash
-    $ ./install.sh install
+    $ ./install.sh --install
     ```
 
 # Uninstall
@@ -54,4 +54,14 @@ __XFWall can be installed by following these steps:__
 
 __XFWall can be uninstalled by following these steps:__
 
-+ Run `install.sh` with the option uninstall
++ Run `install.sh` with the option `--uninstall`
+
+    ```bash
+    $ ./install.sh --uninstall
+    ```
+
++ Remove cloned folder
+
+    ```bash
+    $ rm -rf ./xfwall
+    ```
