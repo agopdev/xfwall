@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export CONFIG_FILE_PATH=~/.xfwall/config.json
+export XFWALL_VERSION="0.1.0"
 
 # Monitor name
 get_all_monitors() {
@@ -83,6 +84,11 @@ start () {
     done
 }
 
+# Show versin
+display_version() {
+    echo "xfwall version: $XFWALL_VERSION"
+}
+
 # Show help
 display_help() {
     echo "
@@ -96,6 +102,7 @@ display_help() {
     |________________________________________________________________________| |
      \________________________________________________________________________\'
 
+        Version: "$XFWALL_VERSION"
 
         Usage: xfwall [command|option] [value]
 
@@ -113,6 +120,7 @@ display_help() {
         -h, --help              Shows this screen
         -sc, --show-config      Shows the actual configuration
         -sm, --show-monitors    Shows the available monitors
+        -v, --version           Shows the version of xfwall
 
 
         Search options:
@@ -312,6 +320,9 @@ print_xfwall_configuration(){
 
 # Set options from CLI
 case "$1" in
+    --version|-v)
+        display_version
+        ;;
     --help|-h)
         display_help
         ;;
