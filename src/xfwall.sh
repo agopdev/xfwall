@@ -97,33 +97,36 @@ display_help() {
      \________________________________________________________________________\'
 
 
-        Usage: See each category
-
-        COMMON:
-        Usage: xfwall [option]
-        --help, -h              Prints this screen
-        --config, -c            Prints the actual configuration
-        --monitors, -m          Prints the actual monitors
+        Usage: xfwall [command|option] [value]
 
 
-        WALLPAPERS:
-        Usage: xfwall [command]
+        Commands:
         start                   Start xfwall with the actual configuration
         change                  Change actual wallpaper, doesn't restart timer
+        add                     Add some search parameter
+        del                     Remove some search parameter
+        enable                  Enable some search option
+        disable                 Disable some search option
 
 
-        SEARCH PARAMS:
-        Usage: xfwall [add/del] [option] [value]
-        --categories, -c        Accepted values: general, anime, people
-        --purity, -p            Accepted values: sfw, sketchy, nsfw
-        --resolution, -r        Resolution for the search. Ex. --resolution 1920x1080
-        --tag, -t               Tag for the search. Ex. --tag landscapes
+        Global options:
+        -h, --help              Shows this screen
+        -sc, --show-config      Shows the actual configuration
+        -sm, --show-monitors    Shows the available monitors
 
 
-        CONFIG:
-        Usage: xfwall [option] [value]
-        --interval, -i          Set time in seconds until next wallpaper. Ex. --interval 300
-        --api-key, -a           Set api key for the nsfw purity option
+        Search options:
+        -c, --categories        Accepted values: general, anime, people
+        -p, --purity            Accepted values: sfw, sketchy, nsfw
+
+        Search parameters:
+        -r, --resolution        Resolution for the search. Ex. add --resolution 1920x1080
+        -t, --tag               Tag for the search. Ex. add --tag landscapes
+
+
+        Config options:
+        -i, --interval          Set time in seconds until next wallpaper. Ex. --interval 300
+        -a, --api-key           Set api key for the nsfw purity option
         
         
     "
@@ -309,13 +312,13 @@ print_xfwall_configuration(){
 
 # Set options from CLI
 case "$1" in
-    --help|-h|help)
+    --help|-h)
         display_help
         ;;
-    --config|-c)
+    --show-config|-sc)
         print_xfwall_configuration
         ;;
-    --monitors|-m)
+    --show-monitors|-sm)
         get_all_monitors
         ;;
     start)

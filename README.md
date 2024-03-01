@@ -65,3 +65,29 @@ __XFWall can be uninstalled by following these steps:__
     ```bash
     $ rm -rf ./xfwall
     ```
+
+# Usage
+### Commands
+- `Start`: You can simply start xfwall by executing `xfwall start` in the terminal.
+- `Change`: Change the current wallpaper without restarting the timer.
+-`Add`: Add a search parameter.
+- `Delete`: Remove a search parameter.
+- `Enable`: Enable a search option.
+- `Disable`: Disable a search option.
+
+### Global Options
+- `-h`, `--help`: Shows this screen.
+- `-sc`, `--show-config`: Shows the actual configuration.
+- `-sm`, `--show-monitors`: Shows the available monitors.
+
+### Search Options
+- `-c`, `--categories`: Accepted values: general, anime, people.
+- `-p`, `--purity`: Accepted values: sfw, sketchy, nsfw.
+
+### Search Parameters
+- `-r`, `--resolution`: Resolution for the search. Example: `add --resolution 1920x1080`.
+- `-t`, `--tag`: Tag for the search. Example: `add --tag landscapes`.
+
+### Configuration Options
+- `-i`, `--interval`: Set time in seconds until next wallpaper. Example: `--interval 300`.
+- `-a`, `--api-key`: Set API key for the nsfw purity option.
