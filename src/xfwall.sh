@@ -152,7 +152,7 @@ display_help() {
 
         Search parameters:
         -r, --resolution        Resolution for the search. Ex. xfwall add --resolution 1920x1080
-        -t, --tag               Tag for the search. Ex. xfwall add --tag "city lights"
+        -t, --tag               Tag for the search. Ex. xfwall add --tag \"city lights\"
 
 
         Config options:
