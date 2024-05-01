@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export CONFIG_FILE_PATH=~/.xfwall/config.json
-export XFWALL_VERSION="0.1.1"
+export XFWALL_VERSION="0.1.2"
 
 # Monitor name
 get_all_monitors() {
@@ -24,6 +24,25 @@ check_dependencies() {
 
 check_dependencies
 
+# URL Encoder for special characters
+url_encode() {
+    local string="${1}"
+    local strlen=${#string}
+    local encoded=""
+    local pos c o
+
+    for (( pos = 0 ; pos < strlen ; pos++ )); do
+    c=${string:$pos:1}
+    case "$c" in
+        [-_.~a-zA-Z0-9] ) o="${c}" ;;
+        * ) printf -v o '%%%02x' "'$c" ;;
+    esac
+    encoded+="${o}"
+    done
+
+    echo "${encoded}"
+}
+
 # Get wallpaper URL and select one randomly
 get_wallpaper_url() {
     local tag=$(get_random_tag)
@@ -34,8 +53,10 @@ get_wallpaper_url() {
     local sorting=$(get_sorting)
 
     local output_json="/tmp/output.json"
+
+    local tag_encoded=$(url_encode "$tag")
     
-    curl -s "https://wallhaven.cc/api/v1/search?q=$tag&categories=$categories&purity=$purity&resolutions=$resolutions&sorting=$sorting&apikey=$apikey" > "$output_json"
+    curl -s "https://wallhaven.cc/api/v1/search?q=$tag_encoded&categories=$categories&purity=$purity&resolutions=$resolutions&sorting=$sorting&apikey=$apikey" > "$output_json"
 
     local random_index
     total_elements=$(jq '.data | length' "$output_json")
@@ -130,12 +151,12 @@ display_help() {
         -p, --purity            Accepted values: sfw, sketchy, nsfw
 
         Search parameters:
-        -r, --resolution        Resolution for the search. Ex. add --resolution 1920x1080
-        -t, --tag               Tag for the search. Ex. add --tag landscapes
+        -r, --resolution        Resolution for the search. Ex. xfwall add --resolution 1920x1080
+        -t, --tag               Tag for the search. Ex. xfwall add --tag "city lights"
 
 
         Config options:
-        -i, --interval          Set time in seconds until next wallpaper. Ex. --interval 300
+        -i, --interval          Set time in seconds until next wallpaper. Ex. xfwall --interval 300
         -a, --api-key           Set api key for the nsfw purity option
         
         
