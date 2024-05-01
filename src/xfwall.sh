@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export CONFIG_FILE_PATH=~/.xfwall/config.json
-export XFWALL_VERSION="0.1.1"
+export XFWALL_VERSION="0.1.2"
 
 # Monitor name
 get_all_monitors() {
