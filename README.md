@@ -91,3 +91,9 @@ __XFWall can be uninstalled by following these steps:__
 ### Configuration Options
 - `-i`, `--interval`: Set time in seconds until next wallpaper. Example: `--interval 300`.
 - `-a`, `--api-key`: Set API key for the nsfw purity option.
+
+
+## Donations
+This script is a part-time hobby and sometimes not actively mantained in months (even years). 
+
+Still, if you like my work and would like to support me, you can do so through this [link](https://paypal.me/agopdev).
