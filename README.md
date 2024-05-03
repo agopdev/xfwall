@@ -31,7 +31,7 @@ __XFWall can be installed by following these steps:__
 + Clone GitHub repository
 
     ```bash
-    $ git clone https://github.com/alonsogonzalezleal/xfwall.git
+    $ git clone https://github.com/agopdev/xfwall.git
     ```
 + Change to cloned directory
 
