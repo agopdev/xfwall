@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export CONFIG_FILE_PATH=~/.xfwall/config.json
-export XFWALL_VERSION="0.1.2"
+export XFWALL_VERSION="0.1.3"
 
 # Monitor name
 get_all_monitors() {
@@ -127,12 +127,14 @@ display_help() {
 
         Version: "$XFWALL_VERSION"
 
+        By Alonso González-Leal
+
         Usage: xfwall [command|option] [value]
 
 
         Commands:
         start                   Start xfwall with the actual configuration
-        change                  Change actual wallpaper, doesn't restart timer
+        change                  Change current wallpaper, doesn't restart timer
         add                     Add some search parameter
         del                     Remove some search parameter
         enable                  Enable some search option
