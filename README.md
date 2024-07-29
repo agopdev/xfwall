@@ -68,28 +68,35 @@ __XFWall can be uninstalled by following these steps:__
 
 # Usage
 ### Commands
-- `Start`: You can simply start xfwall by executing `xfwall start` in the terminal.
-- `Change`: Change the current wallpaper without restarting the timer.
--`Add`: Add a search parameter.
-- `Delete`: Remove a search parameter.
-- `Enable`: Enable a search option.
-- `Disable`: Disable a search option.
+- `start`: You can simply start xfwall by executing `xfwall start` in the terminal.
+- `stop`: Kills all xfwall start processes.
+- `change`: Change current wallpaper to a random tag already added without restarting the timer.
+- `add`: Add a search parameter.
+- `del`: Remove a search parameter.
+- `enable`: Enable a search option.
+- `disable`: Disable a search option.
 
 ### Global Options
-- `-h`, `--help`: Shows this screen.
-- `-sc`, `--show-config`: Shows the actual configuration.
-- `-sm`, `--show-monitors`: Shows the available monitors.
+- `-h`, `--help`: Prints xfwall info.
+- `-sc`, `--show-config`: Prints the actual configuration.
+- `-sm`, `--show-monitors`: Prints the available monitors.
+- `-v`, `--version`: Prints the version of xfwall.
+
+### Change options
+- `""`: Change actual wallpaper from the previously added tags.
+- `-q`, `--query`: Change actual wallpaper from a specific query.
+- `-i`, `--id`: Change actual wallpaper from id.
 
 ### Search Options
 - `-c`, `--categories`: Accepted values: general, anime, people.
 - `-p`, `--purity`: Accepted values: sfw, sketchy, nsfw.
 
 ### Search Parameters
-- `-r`, `--resolution`: Resolution for the search. Example: `add --resolution 1920x1080`.
-- `-t`, `--tag`: Tag for the search. Example: `add --tag landscapes`.
+- `-r`, `--resolution`: Resolution for the search.
+- `-t`, `--tag`: Tag for the search.
 
 ### Configuration Options
-- `-i`, `--interval`: Set time in seconds until next wallpaper. Example: `--interval 300`.
+- `-i`, `--interval`: Set time in seconds until next wallpaper.
 - `-a`, `--api-key`: Set API key for the nsfw purity option.
 
 

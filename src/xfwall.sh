@@ -1,7 +1,8 @@
 #!/bin/bash
 
 export CONFIG_FILE_PATH=~/.xfwall/config.json
-export XFWALL_VERSION="0.1.4"
+export XFWALL_VERSION="0.2.0"
+export OUTPUT_JSON="/tmp/output.json"
 
 # Monitor name
 get_all_monitors() {
@@ -44,30 +45,44 @@ url_encode() {
 }
 
 # Get wallpaper URL and select one randomly
-get_wallpaper_url() {
-    local tag=$(get_random_tag)
+get_random_wallpaper_url() {
+    local tag="$1"
     local categories=$(get_categories)
     local purity=$(get_purity)
     local apikey=$(get_apikey)
     local resolutions=$(get_resolutions)
     local sorting=$(get_sorting)
 
-    local output_json="/tmp/output.json"
-
     local tag_encoded=$(url_encode "$tag")
     
-    curl -s "https://wallhaven.cc/api/v1/search?q=$tag_encoded&categories=$categories&purity=$purity&resolutions=$resolutions&sorting=$sorting&apikey=$apikey" > "$output_json"
+    curl -s "https://wallhaven.cc/api/v1/search?q=$tag_encoded&categories=$categories&purity=$purity&resolutions=$resolutions&sorting=$sorting&apikey=$apikey" > "$OUTPUT_JSON"
 
     local random_index
-    total_elements=$(jq '.data | length' "$output_json")
+    total_elements=$(jq '.data | length' "$OUTPUT_JSON")
     random_index=$(shuf -i 0-$((total_elements - 1)) -n 1)
 
     local wallpaper_url
-    wallpaper_url=$(jq -r ".data[$((random_index))].path" "$output_json")
+    wallpaper_url=$(jq -r ".data[$((random_index))].path" "$OUTPUT_JSON")
 
-    rm "$output_json"
+    rm "$OUTPUT_JSON"
 
     echo "$wallpaper_url"
+}
+
+# Get exact wallpaper from id
+get_wallpaper_url_from_id() {
+    local id="$1"
+    local apikey=$(get_apikey)
+
+    local id_encoded=$(url_encode "$id")
+
+    curl -s "https://wallhaven.cc/api/v1/w/$id_encoded?apikey=$apikey" > "$OUTPUT_JSON"
+
+    local wallpaper_url
+    wallpaper_url=$(jq -r ".data.path" "$OUTPUT_JSON")
+
+    echo "$wallpaper_url"
+
 }
 
 # Download and set wallpaper
@@ -90,7 +105,14 @@ update_wallpaper() {
 
 # Change wallpaper
 do_wallpaper_replacement () {
-    wallpaper_url=$(get_wallpaper_url)
+    wallpaper_url=$(get_random_wallpaper_url "$1")
+    echo "Actual wallpaper: $wallpaper_url"
+    update_wallpaper "$wallpaper_url"
+}
+
+# Change actual wallpaper to exact wallpaper id
+do_wallpaper_replacement_from_id () {
+    wallpaper_url=$(get_wallpaper_url_from_id "$1")
     echo "Actual wallpaper: $wallpaper_url"
     update_wallpaper "$wallpaper_url"
 }
@@ -100,10 +122,19 @@ start () {
     
     while true; do
         local interval=$(get_interval)
-        do_wallpaper_replacement
+        local tag=$(get_random_tag)
+        do_wallpaper_replacement "$tag"
         sleep "$interval"
     done
 }
+
+# Stop xfwall by killing all xfwall start processes
+stop () {
+    for pid in $(pgrep -f "xfwall start") $(pgrep -f "xfwall.sh start"); do
+        kill -9 $pid
+    done
+}
+
 
 # Show versin
 display_version() {
@@ -118,7 +149,7 @@ display_help() {
         \  \ /  / |   ____\   \  /  \  /   / /   \     |  |     |  |     
          \  V  /  |  |__   \   \/    \/   / /  ^  \    |  |     |  |     
           >   <   |   __|   \            / /  /_\  \   |  |     |  |     
-         /  .  \  |  |       \    /\    / /  _____  \  |   ----.|   ----.
+         /  .  \  |  |       \    /\    / /  _____  \  |  \`----.|  \`----.
         /__/ \__\ |__|        \__/  \__/ /__/     \__\ |_______||_______|
                                                                  
 
@@ -133,33 +164,39 @@ display_help() {
 
 
         Commands:
-        start                   Start xfwall with the actual configuration
-        change                  Change current wallpaper, doesn't restart timer
-        add                     Add some search parameter
-        del                     Remove some search parameter
-        enable                  Enable some search option
-        disable                 Disable some search option
+        start                   Start xfwall with the actual configuration.
+        stop                    Kills all xfwall start processes.
+        change                  Change current wallpaper to a random tag already added, doesn't restart timer
+        add                     Add a search parameter
+        del                     Remove a search parameter
+        enable                  Enable a search option
+        disable                 Disable a search option
 
 
         Global options:
-        -h, --help              Shows this screen
-        -sc, --show-config      Shows the actual configuration
-        -sm, --show-monitors    Shows the available monitors
-        -v, --version           Shows the version of xfwall
+        -h, --help              Prints this screen
+        -sc, --show-config      Prints the actual configuration
+        -sm, --show-monitors    Prints the available monitors
+        -v, --version           Prints the version of xfwall
 
+
+        Change options:
+        \"\"                    Change actual wallpaper from the previously added tags. Ex. xfwall change
+        -q, --query             Change actual wallpaper from a specific query. Ex. xfwall change --query \"rain city\"
+        -i, --id                Change actual wallpaper from id. Ex. xfwall change --id \"94x38z\"
 
         Search options:
-        -c, --categories        Accepted values: general, anime, people
-        -p, --purity            Accepted values: sfw, sketchy, nsfw
+        -c, --categories        Accepted values: general, anime, people. Ex. xfwall enable -c \"anime\"
+        -p, --purity            Accepted values: sfw, sketchy, nsfw. Ex. xfwall disable -p \"nsfw\"
 
         Search parameters:
-        -r, --resolution        Resolution for the search. Ex. xfwall add --resolution 1920x1080
+        -r, --resolution        Resolution for the search. Ex. xfwall add --resolution \"1920x1080\"
         -t, --tag               Tag for the search. Ex. xfwall add --tag \"city lights\"
 
 
         Config options:
-        -i, --interval          Set time in seconds until next wallpaper. Ex. xfwall --interval 300
-        -a, --api-key           Set api key for the nsfw purity option
+        --interval          Set time in seconds until next wallpaper. Ex. xfwall --interval \"300\"
+        --api-key           Set api key for the nsfw purity option. Ex. xfwall --api-key \"API_KEY\"
         
         
     "
@@ -360,8 +397,26 @@ case "$1" in
     start)
         start
         ;;
+    stop)
+        stop
+        ;;
     change)
-        do_wallpaper_replacement
+        case "$2" in
+            "")
+                tag=$(get_random_tag)
+                do_wallpaper_replacement "$tag"
+                ;;
+            --query|-q)
+                do_wallpaper_replacement "$3"
+                ;;
+            --id|-i)
+                do_wallpaper_replacement_from_id "$3"
+                ;;
+            *)
+                echo "Error: Unrecognized option '$2'"
+                exit 1
+                ;;
+        esac
         ;;
     add|del)
         case "$2" in
@@ -391,10 +446,10 @@ case "$1" in
                 ;;
         esac
         ;;
-    --api-key|-a)
+    --api-key)
         set_apikey "$2"
         ;;
-    --interval|-i)
+    --interval)
         set_interval "$2"
         ;;
     "")
