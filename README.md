@@ -1,16 +1,12 @@
 # XFWall
+        ___   ___  ___________    __    ____  ___       __       __      
+        \  \ /  / |   ____\   \  /  \  /   / /   \     |  |     |  |     
+         \  V  /  |  |__   \   \/    \/   / /  ^  \    |  |     |  |     
+          >   <   |   __|   \            / /  /_\  \   |  |     |  |     
+         /  .  \  |  |       \    /\    / /  _____  \  |  `----.|  `----.
+        /__/ \__\ |__|        \__/  \__/ /__/     \__\ |_______||_______|
 
-    __________________________________________________________________________
-    |    ___   ___  ___________    __    ____  ___       __       __         |\ 
-    |    \  \ /  / |   ____\   \  /  \  /   / /   \     |  |     |  |        | |                                                                    
-    |     \  V  /  |  |__   \   \/    \/   / /  ^  \    |  |     |  |        | |
-    |      >   <   |   __|   \            / /  /_\  \   |  |     |  |        | |
-    |     /  .  \  |  |       \    /\    / /  _____  \  |   ----.|   ----.   | |
-    |    /__/ \__\ |__|        \__/  \__/ /__/     \__\ |_______||_______|   | |
-    |________________________________________________________________________| |
-     \________________________________________________________________________\'
-
-**XFWall** is a bash script to set wallpapers from Wallhaven API in XFCE. Works with X11.
+**XFWall** is a bash script to set wallpapers from **Wallhaven** API in **XFCE**. Works with X11.
 
 **IMPORTANT:** I wrote this script for myself, even if I tried to make this compatible with others devices I can´t guarantee that works on every machine. If you found a problem or know how to solve it. Create a new issue.
 
@@ -28,7 +24,7 @@ $ sudo apt update && sudo apt install curl jq xrandr git
 # Install
 __XFWall can be installed by following these steps:__
 
-+ Clone GitHub repository
++ Clone GitHub repository or download the last version from [Releases](https://github.com/agopdev/xfwall/releases)
 
     ```bash
     $ git clone https://github.com/agopdev/xfwall.git
@@ -96,8 +92,9 @@ __XFWall can be uninstalled by following these steps:__
 - `-t`, `--tag`: Tag for the search.
 
 ### Configuration Options
-- `-i`, `--interval`: Set time in seconds until next wallpaper.
-- `-a`, `--api-key`: Set API key for the nsfw purity option.
+- `--interval`: Set time in seconds until next wallpaper.
+- `--history`: Set the history length. Only saves the last images.
+- `--api-key`: Set API key for the nsfw purity option.
 
 
 ## Donations

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export CONFIG_FILE_PATH=~/.xfwall/config.json
-export XFWALL_VERSION="0.2.0"
+export CONFIG_FILE_PATH="$HOME/.xfwall/config.json"
+export XFWALL_VERSION="1.0.0"
 export OUTPUT_JSON="/tmp/output.json"
 
 # Monitor name
@@ -88,7 +88,7 @@ get_wallpaper_url_from_id() {
 # Download and set wallpaper
 update_wallpaper() {
     local wallpaper_url="$1"
-    local image_path=~/.xfwall/history/last_img.jpg
+    local image_path="$HOME/.xfwall/history/${wallpaper_url##*/}"
     local monitors=$(get_all_monitors)
 
     for monitor in $monitors; do
@@ -96,11 +96,30 @@ update_wallpaper() {
 
         if [ $? -eq 0 ]; then
             xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitor$monitor/workspace0/last-image --set "$image_path"
+            clear_history
             echo "Wallpaper updated for monitor: $monitor"
         else
             echo "Error: The wallpaper could not be downloaded"
         fi
     done
+}
+
+# Clear history
+clear_history() {
+    local history_count=$(get_history)
+    local history_dir="$HOME/.xfwall/history"
+
+    local files=($(ls -1t "$history_dir"))
+
+    local num_files=${#files[@]}
+
+    if [ "$num_files" -gt "$history_count" ]; then
+        local files_to_remove=$((num_files - history_count))
+
+        for ((i=history_count; i<num_files; i++)); do
+            rm "$history_dir/${files[i]}"
+        done
+    fi
 }
 
 # Change wallpaper
@@ -196,6 +215,7 @@ display_help() {
 
         Config options:
         --interval          Set time in seconds until next wallpaper. Ex. xfwall --interval \"300\"
+        --history           Set the history length. Only saves the last images. Ex. xfwall --history \"5\"
         --api-key           Set api key for the nsfw purity option. Ex. xfwall --api-key \"API_KEY\"
         
         
@@ -217,6 +237,15 @@ set_interval(){
 
 get_interval(){
     jq -r '.config.interval' $CONFIG_FILE_PATH
+}
+
+# History
+set_history(){
+    edit_json_file ".config.history = "$1""
+}
+
+get_history(){
+    jq -r '.config.history' $CONFIG_FILE_PATH
 }
 
 # Sorting
@@ -372,6 +401,7 @@ print_xfwall_configuration(){
         Categories (general/anime/people):      $(get_categories)
         Purity (sfw/sketchy/nsfw):              $(get_purity)
         Interval:                               $(get_interval)
+        History length:                         $(get_history)
         Api Key:                                $(get_apikey)
     
     "
@@ -452,6 +482,9 @@ case "$1" in
     --interval)
         set_interval "$2"
         ;;
+    --history)
+        set_history "$2"
+        ;;
     "")
         display_help
         ;;
@@ -460,8 +493,3 @@ case "$1" in
         exit 1
         ;;
 esac
-
-# Echo Errors
-echo_error(){
-    echo $error
-}

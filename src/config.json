@@ -1,6 +1,7 @@
 {
 	"config": {
-    	"interval": 300
+    	"interval": 300,
+		"history": 5
   	},
 	"wallhaven": {
 		"tags": [
