@@ -1,10 +1,15 @@
-# XFWall
+# [Deprecated] - XFWall
         ___   ___  ___________    __    ____  ___       __       __      
         \  \ /  / |   ____\   \  /  \  /   / /   \     |  |     |  |     
          \  V  /  |  |__   \   \/    \/   / /  ^  \    |  |     |  |     
           >   <   |   __|   \            / /  /_\  \   |  |     |  |     
          /  .  \  |  |       \    /\    / /  _____  \  |  `----.|  `----.
         /__/ \__\ |__|        \__/  \__/ /__/     \__\ |_______||_______|
+
+# Attention [Deprecated]
+This script has been deprecated in favor of [Wallflow](https://github.com/agopdev/wallflow), a new script that allows you to change the wallpaper in almost any Linux desktop environment, as well as featuring new capabilities that will be added in the future.
+
+**IT IS RECOMMENDED TO USE WALLFLOW INSTEAD OF XFWALL**
 
 **XFWall** is a bash script to set wallpapers from **Wallhaven** API in **XFCE**. Works with X11.
 
